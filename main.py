@@ -29,6 +29,7 @@ MTRANS = st.selectbox("Which transportation do you usually use?",['Public_Transp
 features = [Gender, Age,  FHO, FAVC, FCVC, NCP, CAEC, SMOKE, CH2O, SCC, FAF, TUE, CALC, MTRANS]
 
 if st.button('Predict'):
+    st.write('Training model, please, wait!')
     pat = patient_pred(features)
     pat.predict_NObeyesdad(data_path)
     obe_class = pat.NObeyesdad

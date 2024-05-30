@@ -28,13 +28,16 @@ columns = ['Gender',
  'CALC',
  'MTRANS']
 
-
+'''
 try:
     oe = joblib.load('./model/oe.joblib') 
     le = joblib.load('./model/le.joblib') 
 except OSError as e:
     oe = OrdinalEncoder()
     le = LabelEncoder()
+'''
+oe = OrdinalEncoder()
+le = LabelEncoder()    
 
 class patient_pred:
     def __init__(self, features):
@@ -59,8 +62,8 @@ class patient_pred:
         df_categorized[['Gender','SMOKE','FHO','FAVC','CAEC','SCC',
                                 'CALC','MTRANS']] = oe.fit_transform(df_ct)
         df_categorized['NObeyesdad'] = le.fit_transform(Y)  
-        joblib.dump(oe,'./model/oe.joblib') 
-        joblib.dump(le,'./model/le.joblib') 
+      #  joblib.dump(oe,'./model/oe.joblib') 
+      #  joblib.dump(le,'./model/le.joblib') 
         return df_categorized
     
     def preprocess_input_pred(self,df):
@@ -84,13 +87,30 @@ class patient_pred:
         features_columns=df.columns[~df.columns.isin(['NObeyesdad','Height','Weight'])]
         X,Y = df[features_columns],df['NObeyesdad']
        # X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size= 0.1, random_state=2)
-        parameters = {'max_depth':[None,2,4,6],'n_estimators':[100,500,1000]}
+        parameters = {'max_depth':[None],'n_estimators':[1000]}
         rf = RandomForestClassifier()
         clf = GridSearchCV(rf, parameters,return_train_score=True)
         print('Time to train data')
         clf.fit(X,Y)
-        joblib.dump(clf, "./model/model.pkl") 
+       # joblib.dump(clf, "./model/model.pkl") 
         print('Data trained successfully')
+        return clf
+
+    def predict_NObeyesdad(self,path):
+        
+            df=self.read_data(path)
+            df_categ=self.preprocess_data(df)
+            model= self.model_data(df_categ) 
+            feat = dict(map(lambda i,j: (i,j), columns, self.features))
+            f=  pd.DataFrame(feat,index=[0])
+            f['NObeyesdad']=None
+            features_prep=self.preprocess_input_pred(f) 
+            features_prep.drop(columns=['NObeyesdad'],inplace=True)
+            prediction=model.predict(features_prep.values) 
+            target_decoded = le.inverse_transform(np.array(prediction))
+            self.NObeyesdad = inv_map[target_decoded[0]]
+
+'''
     
     def predict_NObeyesdad(self,path):
         try:
@@ -112,3 +132,4 @@ class patient_pred:
             target_decoded = le.inverse_transform(np.array(prediction))
             self.NObeyesdad = inv_map[target_decoded[0]]
         
+'''
