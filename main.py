@@ -60,8 +60,9 @@ features = [
 ]
 
 if st.button("Predict"):
-    st.write("Training model, please, wait!")
     pat = ModelTrainer(features)
+    if not pat.trained:
+        st.write("Training model, please, wait!")
     pat.predict_NObeyesdad(data_path)
     obe_class = pat.NObeyesdad
     st.write(f"This patient has the following weight class: {obe_class}")

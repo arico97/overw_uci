@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 import pandas as pd
 import numpy as np
+import os
 
 from .model import ModelBase
 from . import DataPreprocessor
@@ -14,6 +15,14 @@ class ModelTrainer(ModelBase):
     def __init__(self, features: list):
         super().__init__(features)
         self.model = None
+        self.trained = self.is_trained()
+
+    def is_trained(self) -> bool:
+        if os.path.exists(model_path):
+            self.model = joblib.load(model_path)
+            return True
+        else:
+            return False
 
     def train_model(self, df: pd.DataFrame):
         features_columns = df.columns[~df.columns.isin(["NObeyesdad", "Height", "Weight"])]
@@ -23,13 +32,16 @@ class ModelTrainer(ModelBase):
         clf = GridSearchCV(rf, parameters, return_train_score=True)
         clf.fit(X, Y)
         self.model = clf
+        joblib.dump(clf, model_path)
+        self.trained = True
 
 
     def predict_NObeyesdad(self, path: str) -> None:
         df = pd.read_csv(path)
         dp = DataPreprocessor()
         df_categ = dp.preprocess_data(df)
-        self.train_model(df_categ)
+        if not self.trained:
+            self.train_model(df_categ)
         feat = dict(map(lambda i, j: (i, j), columns, self.features))
         f = pd.DataFrame(feat, index=[0])
         f[target] = None

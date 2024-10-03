@@ -15,3 +15,7 @@ class ModelBase(ABC):
     @abstractmethod
     def predict_NObeyesdad(self, path: str) -> None:
         pass
+
+    @abstractmethod
+    def is_trained(self) -> None:
+        pass

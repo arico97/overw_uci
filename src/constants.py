@@ -30,3 +30,4 @@ target = 'NObeyesdad'
 
 inv_map = {v: k for k, v in mapping.items()}
 
+model_path = './src/trained_models/model_trained.joblib'
